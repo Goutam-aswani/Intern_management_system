@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intern Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: #2c3e50;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .navbar h1 {
+            font-size: 1.5rem;
+        }
+
+        .navbar-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .navbar-buttons button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .navbar-buttons button:hover {
+            background-color: #2980b9;
+        }
+
+        .navbar-buttons .logout-btn {
+            background-color: #e74c3c;
+        }
+
+        .navbar-buttons .logout-btn:hover {
+            background-color: #c0392b;
+        }
+
+        /* Main Container */
+        .container {
+            display: flex;
+            min-height: calc(100vh - 80px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background-color: #34495e;
+            color: white;
+            padding: 2rem 0;
+        }
+
+        .sidebar ul {
+            list-style: none;
+        }
+
+        .sidebar li {
+            padding: 1rem 2rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            border-bottom: 1px solid #2c3e50;
+        }
+
+        .sidebar li:hover {
+            background-color: #2c3e50;
+        }
+
+        .sidebar li.active {
+            background-color: #3498db;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+        }
+
+        .section {
+            display: none;
+            background-color: white;
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 0.5rem;
+        }
+
+        /* Cards */
+        .card {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .card h3 {
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        .card p {
+            color: #6c757d;
+            margin-bottom: 0.5rem;
+        }
+
+        .status {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            font-weight: bold;
+        }
+
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-in-progress {
+            background-color: #cce5ff;
+            color: #004085;
+        }
+
+        .status-completed {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-success {
+            background-color: #27ae60;
+        }
+
+        .btn-success:hover {
+            background-color: #229954;
+        }
+
+        /* Loading and Messages */
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #6c757d;
+        }
+
+        .message {
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+
+        .message-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                order: 2;
+            }
+            
+            .main-content {
+                order: 1;
+            }
+            
+            .navbar {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <h1>Intern Dashboard</h1>
+        <div id="manager-info" style="font-size: 0.9rem; opacity: 0.8; margin-top: 0.25rem;">
+            <span id="manager-name">Loading...</span>
+        </div>
+        <div class="navbar-buttons">
+            <button onclick="goToProfile()">Profile</button>
+            <button onclick="showManagerProfile()">Manager Profile</button>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="sidebar">
+            <ul>
+                <li class="sidebar-item active" onclick="showSection('projects')">Projects</li>
+                <li class="sidebar-item" onclick="showSection('tasks')">Tasks</li>
+                <li class="sidebar-item" onclick="showSection('create-report')">Create Daily Report</li>
+                <li class="sidebar-item" onclick="showSection('my-reports')">My Reports</li>    
+                <li class="sidebar-item" onclick="showSection('manager-profile')">Manager Profile</li>
+
+            </ul>
+        </div>
+
+        <div class="main-content">
+            <div id="projects" class="section active">
+                <h2>My Projects</h2>
+                <div id="projects-loading" class="loading">Loading projects...</div>
+                <div id="projects-content"></div>
+            </div>
+
+            <div id="tasks" class="section">
+                <h2>My Tasks</h2>
+                <div id="tasks-loading" class="loading">Loading tasks...</div>
+                <div id="tasks-content"></div>
+            </div>
+            <div id="create-report" class="section">
+                <h2>Create Daily Report</h2>
+                <form id="report-form">
+                    <div class="form-group">
+                        <label for="task-select">Select Task:</label>
+                        <select id="task-select" name="task" required>
+                            <option value="">Select a task...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="work-summary">Work Summary:</label>
+                        <textarea id="work-summary" name="work_summary" placeholder="Describe what you worked on today..." required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="time-spent">Time Spent (hours):</label>
+                        <input type="number" id="time-spent" name="time_spent" min="0" step="0.5" placeholder="e.g., 2.5" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="remarks">Remarks (optional):</label>
+                        <textarea id="remarks" name="remarks" placeholder="Any challenges, blockers, or additional notes..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success">Submit Report</button>
+                </form>
+            </div>
+        <div id="manager-profile" class="section">
+            <h2>Manager Profile</h2>
+            <div id="manager-profile-loading" class="loading">Loading manager profile...</div>
+                <div id="manager-profile-content"></div>
+        </div>
+            <div id="my-reports" class="section">
+                <h2>My Daily Reports</h2>
+                <div id="reports-loading" class="loading">Loading reports...</div>
+                <div id="reports-content"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+
+        let currentSection = 'projects';
+        let authToken = localStorage.getItem('access');
+        let userTasks = [];
+
+        if (!authToken) {
+            alert('Please log in first');
+            window.location.href = '/login/';
+        }
+
+        function goToProfile() {
+            window.location.href = '/profile/';
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('access');
+                localStorage.removeItem('refresh');
+                localStorage.removeItem('user_type');
+                window.location.href = '/login/';
+            }
+        }
+        function showSection(sectionId) {
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(section => section.classList.remove('active'));
+
+            document.getElementById(sectionId).classList.add('active');
+
+            const sidebarItems = document.querySelectorAll('.sidebar-item');
+            sidebarItems.forEach(item => item.classList.remove('active'));
+            event.target.classList.add('active');
+
+            currentSection = sectionId;
+           
+            if (sectionId === 'projects') {
+                loadProjects();
+            } else if (sectionId === 'tasks') {
+                loadTasks();
+            } else if (sectionId === 'create-report') {
+                loadTasksForReport();
+            } else if (sectionId === 'my-reports') {
+                loadReports();
+            }else if (sectionId === 'manager-profile') {
+        showManagerProfile();
+        }
+    }   function showManagerProfile() {
+    
+        const sections = document.querySelectorAll('.section');
+        sections.forEach(section => section.classList.remove('active'));
+    document.getElementById('manager-profile').classList.add('active');
+    
+    const sidebarItems = document.querySelectorAll('.sidebar-item');
+    sidebarItems.forEach(item => item.classList.remove('active'));
+    
+    const managerProfileItem = Array.from(sidebarItems).find(item => 
+        item.textContent.includes('Manager Profile')
+    );
+    if (managerProfileItem) {
+        managerProfileItem.classList.add('active');
+    }
+    
+    currentSection = 'manager-profile';
+    loadManagerProfile();
+}
+async function loadManagerProfile() {
+    try {
+        {% comment %} const userInfo = await apiCall('/api/profile/'); {% endcomment %}
+        const managerInfo = await apiCall('/api/manager-profile/');
+        displayManagerProfile(managerInfo);
+    } catch (error) {
+        document.getElementById('manager-profile-content').innerHTML = `
+            <div class="message message-error">
+                Failed to load manager profile: ${error.message}
+            </div>
+        `;
+    }
+}
+function displayManagerProfile(managerInfo) {
+    const content = document.getElementById('manager-profile-content');
+    document.getElementById('manager-profile-loading').style.display = 'none';
+    
+    if (!managerInfo || managerInfo.message === 'No manager assigned') {
+        content.innerHTML = '<p>No manager assigned yet.</p>';
+        console.log("wrong jagaha ghus gye")
+        return;
+    }
+    console.log(managerInfo.username)
+    content.innerHTML = `
+        <div class="card">
+            <h3>Manager Information</h3>
+            <p><strong>Manager Name:</strong> ${managerInfo.username}</p>
+            <p><strong>Email:</strong> ${managerInfo.email}</p>
+            <p><strong>Phone:</strong> ${managerInfo.phone}</p>
+            <p><strong>Account Created:</strong> ${managerInfo.created_at}</p>
+            <p><strong>Verified:</strong> ${managerInfo.is_verified ? 'Yes' : 'No'}</p>
+        </div>
+    `;
+}
+        async function apiCall(endpoint, method = 'GET', data = null) {
+            const options = {
+                method: method,
+                headers: {
+                    'Authorization': `Bearer ${authToken}`,
+                    'Content-Type': 'application/json',
+                }
+            };
+
+            if (data) {
+                options.body = JSON.stringify(data);
+            }
+
+            try {
+                const response = await fetch(endpoint, options);
+                const result = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(result.message || 'Something went wrong');
+                }
+                
+                return result;
+            } catch (error) {
+                console.error('API Error:', error);
+                throw error;
+            }
+        }
+        async function loadProjects() {
+            try {
+                const projects = await apiCall('/api/projects/');
+                displayProjects(projects);
+            } catch (error) {
+                document.getElementById('projects-content').innerHTML = `
+                    <div class="message message-error">
+                        Failed to load projects: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        function displayProjects(projects) {
+            const content = document.getElementById('projects-content');
+            document.getElementById('projects-loading').style.display = 'none';
+            
+            if (projects.length === 0) {
+                content.innerHTML = '<p>No projects assigned yet.</p>';
+                return;
+            }
+
+            content.innerHTML = projects.map(project => `
+                <div class="card">
+                    <h3><a href="/project/${project.id}/" style="color: #3498db; text-decoration: none; cursor: pointer;">${project.title}</a></h3>
+                    <p><strong>Description:</strong> ${project.description || 'No description'}</p>
+                    <p><strong>assigned by:</strong> ${project.manager || 'no manager'}</p>
+                    
+                </div>
+            `).join('');
+        }
+        async function loadTasks() {
+            try {
+                const tasks = await apiCall('/api/tasks/');
+                userTasks = tasks;
+                displayTasks(tasks);
+            } catch (error) {
+                document.getElementById('tasks-content').innerHTML = `
+                    <div class="message message-error">
+                        Failed to load tasks: ${error.message}
+                    </div>
+                `;
+            }
+        }
+        function displayTasks(tasks) {
+            const content = document.getElementById('tasks-content');
+            document.getElementById('tasks-loading').style.display = 'none';
+            
+            if (tasks.length === 0) {
+                content.innerHTML = '<p>No tasks assigned yet.</p>';
+                return;
+            }
+
+            content.innerHTML = tasks.map(task => `
+                <div class="card">
+                    <h3><a href="/tasks/${task.id}/" style="color: #3498db; text-decoration: none; cursor: pointer;">${task.title}</a></h3>
+                    <p><strong>Description:</strong> ${task.description || 'No description'}</p>
+                    {% comment %} <p><strong>Project:</strong> ${task.project}</p>
+                    <p><strong>Status:</strong> <span class="status status-${task.status.replace('_', '-')}">${task.status}</span></p>
+                    <p><strong>Due Date:</strong> ${task.due_date || 'Not set'}</p>
+                    <p><strong>Assigned By:</strong> ${task.assigned_by}</p> {% endcomment %}
+                </div>
+            `).join('');
+        }
+
+
+        async function loadTasksForReport() {
+            try {
+                if (userTasks.length === 0) {
+                    await loadTasks();
+                }
+                
+                const taskSelect = document.getElementById('task-select');
+                taskSelect.innerHTML = '<option value="">Select a task...</option>';
+                
+                userTasks.forEach(task => {
+                    const option = document.createElement('option');
+                    option.value = task.title;
+                    option.textContent = `${task.title} (${task.project})`;
+                    taskSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Failed to load tasks for report:', error);
+            }
+        }
+        async function loadReports() {
+            try {
+                const reports = await apiCall('/api/daily_report/');
+                displayReports(reports);
+            } catch (error) {
+                document.getElementById('reports-content').innerHTML = `
+                    <div class="message message-error">
+                        Failed to load reports: ${error.message}
+                    </div>
+                `;
+            }
+        }
+        function displayReports(reports) {
+            const content = document.getElementById('reports-content');
+            document.getElementById('reports-loading').style.display = 'none';
+            
+            if (reports.length === 0) {
+                content.innerHTML = '<p>No daily reports submitted yet.</p>';
+                return;
+            }
+
+            content.innerHTML = reports.map(report => `
+                <div class="card">
+                    <h3><a href="/daily_reports/${report.id}/" style="color: #3498db; text-decoration: none; cursor: pointer;">${report.task_title}</a></h3> 
+                    <p><strong>submittted by:</strong> ${report.intern}</p>
+                    <p><strong>Date:</strong> ${report.date}</p>
+                    </div>
+            `).join('');
+        }
+       async function loadManagerInfo() {
+    try {
+        const userInfo = await apiCall('/api/profile/'); 
+        if (userInfo.intern && userInfo.intern.manager) {
+            document.getElementById('manager-name').textContent = `Manager: ${userInfo.intern.manager}`;
+        } else {
+            document.getElementById('manager-name').textContent = 'No manager assigned';
+        }
+    } catch (error) {
+        document.getElementById('manager-name').textContent = 'Manager: Not available';
+        console.error('Failed to load manager info:', error);
+    }
+}
+        
+        document.getElementById('report-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                task: document.getElementById('task-select').value,
+                work_summary: document.getElementById('work-summary').value,
+                time_spent: `${document.getElementById('time-spent').value}:00:00`, 
+                remarks: document.getElementById('remarks').value
+            };
+
+            try {
+                await apiCall('/api/daily_report/create/', 'POST', formData);
+                
+                const successMessage = document.createElement('div');
+                successMessage.className = 'message message-success';
+                successMessage.textContent = 'Daily report submitted successfully!';
+                
+                const form = document.getElementById('report-form');
+                form.parentNode.insertBefore(successMessage, form);
+                
+                form.reset();
+                
+                setTimeout(() => {
+                    successMessage.remove();
+                }, 5000);
+                
+            } catch (error) {
+                const errorMessage = document.createElement('div');
+                errorMessage.className = 'message message-error';
+                errorMessage.textContent = `Failed to submit report: ${error.message}`;
+                
+                const form = document.getElementById('report-form');
+                form.parentNode.insertBefore(errorMessage, form);
+                
+                setTimeout(() => {
+                    errorMessage.remove();
+                }, 5000);
+            }
+        });
+
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProjects();
+            loadManagerInfo();
+        });
+    </script>
+</body>
+</html>

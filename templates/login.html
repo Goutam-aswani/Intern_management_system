@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login | Intern Management System</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #eef1f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .login-box {
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      width: 350px;
+    }
+
+    .login-box h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .message {
+      font-size: 14px;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .error {
+      color: red;
+    }
+
+    .success {
+      color: green;
+    }
+  </style>
+</head>
+<body>
+
+<div class="login-box">
+  <h2>Login</h2>
+  <form id="login-form">
+    <input type="text" id="username" placeholder="Username" required>
+    <input type="password" id="password" placeholder="Password" required>
+    <button type="submit">Login</button>
+    <div>
+    <center>Don't have an account?</center>
+</div>
+    <div class="links">
+            <center><a href="/signup/">Sign up</a></center>
+        </div>
+    <div class="message" id="login-message"></div>
+  </form>
+</div>
+
+<script>
+  const form = document.getElementById('login-form');
+  const messageBox = document.getElementById('login-message');
+
+  form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value.trim();
+
+    try {
+      const response = await fetch('/api/login/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      
+      const data = await response.json();
+
+      if (response.status === 200) {
+        messageBox.className = 'message success';
+        messageBox.innerText = data.message || "Login successful";
+
+        localStorage.setItem('access', data.access);
+        localStorage.setItem('refresh', data.refresh);
+        localStorage.setItem('user_type', data.user_type);
+        localStorage.setItem('is_manager', data.is_manager);
+
+        setTimeout(() => {
+          window.location.href =  '/landing_page/';
+        }, 1500); 
+      } else {
+        messageBox.className = 'message error';
+        messageBox.innerText = data.message || "Login failed";
+      }
+
+    } catch (err) {
+      console.error(err);
+      messageBox.className = 'message error';
+      messageBox.innerText = "Something went wrong. Please try again.";
+    }
+  });
+</script>
+
+
+</body>
+</html>

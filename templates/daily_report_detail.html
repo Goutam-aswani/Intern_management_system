@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Daily Report Details</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f5f5f5;
+      color: #333;
+      margin: 0;
+      padding: 0;
+    }
+
+    .navbar {
+      background-color: #2c3e50;
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .navbar h1 {
+      font-size: 1.5rem;
+    }
+
+    .navbar-buttons button {
+      background-color: #3498db;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-left: 1rem;
+    }
+
+    .navbar-buttons .logout-btn {
+      background-color: #e74c3c;
+    }
+
+    .container {
+      padding: 2rem;
+    }
+
+    .card {
+      background-color: white;
+      border-radius: 8px;
+      padding: 2rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      margin-bottom: 1rem;
+    }
+
+    .card h2 {
+      margin-bottom: 1rem;
+      color: #2c3e50;
+    }
+
+    .card p {
+      margin-bottom: 0.5rem;
+    }
+
+    .message-error {
+      background-color: #f8d7da;
+      color: #721c24;
+      padding: 1rem;
+      border-radius: 4px;
+      margin-bottom: 1rem;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 2rem;
+      color: #6c757d;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <h1>Daily Report Details</h1>
+    <div class="navbar-buttons">
+      <button onclick="goBack()">Back to Dashboard</button>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div id="loading" class="loading">Loading report...</div>
+    <div id="report-content"></div>
+  </div>
+
+  <script>
+    const reportId = window.location.pathname.split('/')[2];
+
+    async function loadDailyReport() {
+      try {
+        const response = await fetch(`/api/daily_reports/${reportId}/`, {
+          headers: {
+            Authorization: 'Bearer ' + localStorage.getItem('access')
+          }
+        });
+
+        if (!response.ok) throw new Error('Failed to load report');
+
+        const report = await response.json();
+        displayReportDetails(report);
+      } catch (error) {
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('report-content').innerHTML = `
+          <div class="message-error">Error: ${error.message}</div>
+        `;
+      }
+    }
+
+    function displayReportDetails(report) {
+      document.getElementById('loading').style.display = 'none';
+
+      document.getElementById('report-content').innerHTML = `
+        <div class="card">
+          <h2>${report.title}</h2>
+          <p><strong>Intern:</strong> ${report.intern}</p>
+          <p><strong>Task:</strong> ${report.task}</p>
+          <p><strong>Work Summary:</strong> ${report.work_summary}</p>
+          <p><strong>Time Spent:</strong> ${report.time_spent || 'No description'}</p>
+          <p><strong>Remarks:</strong> ${report.remarks}</p>
+          <p><strong>Date:</strong> ${report.date}</p>
+        </div>
+      `;
+    }
+
+    function goBack() {
+      window.location.href = '/manager_dashboard/';
+    }
+
+    function logout() {
+      localStorage.removeItem('access');
+      localStorage.removeItem('refresh');
+      window.location.href = '/login/';
+    }
+
+    document.addEventListener('DOMContentLoaded', loadDailyReport);
+  </script>
+</body>
+</html>

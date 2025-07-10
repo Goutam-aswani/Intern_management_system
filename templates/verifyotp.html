@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Verify OTP | Intern Management</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      padding: 40px;
+    }
+
+    .otp-container {
+      background: #fff;
+      width: 400px;
+      margin: 0 auto;
+      padding: 30px 40px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0 15px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background: #28a745;
+      color: white;
+      font-weight: bold;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .note {
+      font-size: 14px;
+      color: #666;
+      text-align: center;
+      margin-top: 15px;
+    }
+
+    .error {
+      color: red;
+      font-size: 14px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<div class="otp-container">
+  <h2>Enter OTP</h2>
+  <form id="otp-form">
+    <input type="text" id="otp" name="otp" placeholder="Enter 6-digit OTP" maxlength="6" required>
+    <button type="submit">Verify OTP</button>
+    <div class="error" id="otp-error" style="display:none;">Invalid OTP.</div>
+  </form>
+  <p class="note">An OTP was sent to your email. Please enter it here to verify your account.</p>
+</div>
+
+<script>
+  const form = document.getElementById("otp-form");
+  const otpError = document.getElementById("otp-error");
+
+  // Get username from localStorage (set after signup)
+  const username = localStorage.getItem("pendingUsername");
+
+  if (!username) {
+    alert("Username not found. Please register again.");
+    window.location.href = "/signup/";
+  }
+
+  form.addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const payload = {
+      username: username,
+      otp: document.getElementById("otp").value
+    };
+
+    try {
+      const response = await fetch("/api/verify-otp/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+
+      if (response.status === 200) {
+        alert("OTP Verified! Please login.");
+        localStorage.removeItem("pendingUsername");  // Clean up
+        window.location.href ="{% url 'login' %}";
+      } else {
+        otpError.style.display = "block";
+        otpError.textContent = data.message || "OTP verification failed.";
+      }
+    } catch (error) {
+      otpError.style.display = "block";
+      otpError.textContent = "Something went wrong.";
+      console.error(error);
+    }
+  });
+</script>
+
+</body>
+</html>

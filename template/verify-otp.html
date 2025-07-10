@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify OTP - ProjectHub</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .otp-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 3rem;
+            width: 100%;
+            max-width: 450px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            animation: slideIn 0.8s ease-out;
+            text-align: center;
+        }
+
+        .logo {
+            margin-bottom: 2rem;
+        }
+
+        .logo h1 {
+            color: white;
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .verification-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            animation: pulse 2s infinite;
+        }
+
+        .otp-header {
+            color: white;
+            margin-bottom: 2rem;
+        }
+
+        .otp-header h2 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .otp-header p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            color: white;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #4ecdc4;
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 20px rgba(78, 205, 196, 0.3);
+        }
+
+        .otp-input {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .otp-digit {
+            width: 50px;
+            height: 50px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .otp-digit:focus {
+            outline: none;
+            border-color: #4ecdc4;
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 20px rgba(78, 205, 196, 0.3);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 30px rgba(255, 255, 255, 0.2);
+        }
+
+        .loading {
+            position: relative;
+        }
+
+        .loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            margin: -10px 0 0 -10px;
+            border: 2px solid transparent;
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .resend-section {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .resend-text {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 1rem;
+        }
+
+        .timer {
+            color: #4ecdc4;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .links {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 2rem;
+        }
+
+        .links a {
+            color: #4ecdc4;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .links a:hover {
+            color: white;
+        }
+
+        .back-home {
+            position: absolute;
+            top: 2rem;
+            left: 2rem;
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .back-home:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            font-weight: 500;
+            display: none;
+        }
+
+        .alert.success {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4CAF50;
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+
+        .alert.error {
+            background: rgba(244, 67, 54, 0.2);
+            color: #f44336;
+            border: 1px solid rgba(244, 67, 54, 0.3);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @media (max-width: 768px) {
+            .otp-container {
+                padding: 2rem;
+                margin: 1rem;
+            }
+            
+            .back-home {
+                position: static;
+                display: block;
+                text-align: center;
+                margin-bottom: 2rem;
+            }
+
+            .otp-digit {
+                width: 45px;
+                height: 45px;
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="home.html" class="back-home">← Back to Home</a>
+    
+    <div class="otp-container">
+        <div class="logo">
+            <h1>ProjectHub</h1>
+        </div>
+
+        <div class="verification-icon">📧</div>
+
+        <div class="otp-header">
+            <h2>Verify Your Email</h2>
+            <p>We've sent a 6-digit verification code to your email address</p>
+        </div>
+
+        <div id="alert" class="alert"></div>
+
+        <form id="otpForm">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="Enter your username" required readonly>
+            </div>
+
+            <div class="form-group">
+                <label>Enter OTP</label>
+                <div class="otp-input">
+                    <input type="text" class="otp-digit" maxlength="1" data-index="0">
+                    <input type="text" class="otp-digit" maxlength="1" data-index="1">
+                    <input type="text" class="otp-digit" maxlength="1" data-index="2">
+                    <input type="text" class="otp-digit" maxlength="1" data-index="3">
+                    <input type="text" class="otp-digit" maxlength="1" data-index="4">
+                    <input type="text" class="otp-digit" maxlength="1" data-index="5">
+                </div>
+            </div>
+
+            <button type="submit" class="btn" id="verifyBtn">Verify OTP</button>
+        </form>
+
+        <div class="resend-section">
+            <div class="resend-text">
+                <span id="resendText">Didn't receive the code?</span>
+                <div class="timer" id="timer" style="display: none;">Resend in <span id="countdown">60</span>s</div>
+            </div>
+            <button type="button" class="btn btn-secondary" id="resendBtn">Resend OTP</button>
+        </div>
+
+        <div class="links">
+            <p>Wrong email? <a href="signup.html">Sign up again</a></p>
+        </div>
+    </div>
+
+    <script>
+        let resendTimer;
+        let countdownValue = 60;
+
+        // Auto-fill username from localStorage
+        window.addEventListener('load', function() {
+            const username = localStorage.getItem('verification_username');
+            if (username) {
+                document.getElementById('username').value = username;
+            }
+        });
+
+        // OTP input handling
+        const otpInputs = document.querySelectorAll('.otp-digit');
+        
+        otpInputs.forEach((input, index) => {
+            input.addEventListener('input', function() {
+                // Only allow numbers
+                this.value = this.value.replace(/[^0-9]/g, '');
+                
+                // Move to next input
+                if (this.value.length === 1 && index < otpInputs.length - 1) {
+                    otpInputs[index + 1].focus();
+                }
+            });
+
+            input.addEventListener('keydown', function(e) {
+                // Handle backspace
+                if (e.key === 'Backspace' && this.value === '' && index > 0) {
+                    otpInputs[index - 1].focus();
+                }
+            });
+
+            input.addEventListener('paste', function(e) {
+                e.preventDefault();
+                const pastedData = e.clipboardData.getData('text');
+                const numbers = pastedData.replace(/[^0-9]/g, '').slice(0, 6);
+                
+                numbers.split('').forEach((digit, i) => {
+                    if (i < otpInputs.length) {
+                        otpInputs[i].value = digit;
+                    }
+                });
+                
+                // Focus on the next empty input or the last one
+                const nextIndex = Math.min(numbers.length, otpInputs.length - 1);
+                otpInputs[nextIndex].focus();
+            });
+        });
+
+        function getOTP() {
+            return Array.from(otpInputs).map(input => input.value).join('');
+        }
+
+        function clearOTP() {
+            otpInputs.forEach(input => {
+                input.value = '';
+            });
+            otpInputs[0].focus();
+        }
+
+        function showAlert(message, type) {
+            const alert = document.getElementById('alert');
+            alert.textContent = message;
+            alert.className = `alert ${type}`;
+            alert.style.display = 'block';
+            
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 5000);
+        }
+
+        function startResendTimer() {
+            countdownValue = 60;
+            const resendBtn = document.getElementById('resendBtn');
+            const timer = document.getElementById('timer');
+            const countdown = document.getElementById('countdown');
+            
+            resendBtn.disabled = true;
+            timer.style.display = 'block';
+            
+            resendTimer = setInterval(() => {
+                countdownValue--;
+                countdown.textContent = countdownValue;
+                
+                if (countdownValue <= 0) {
+                    clearInterval(resendTimer);
+                    resendBtn.disabled = false;
+                    timer.style.display = 'none';
+                }
+            }, 1000);
+        }
+
+        document.getElementById('otpForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const verifyBtn = document.getElementById('verifyBtn');
+            const username = document.getElementById('username').value;
+            const otp = getOTP();
+            
+            // Validation
+            if (!username) {
+                showAlert('Please enter your username', 'error');
+                return;
+            }
+            
+            if (otp.length !== 6) {
+                showAlert('Please enter all 6 digits of the OTP', 'error');
+                return;
+            }
+            
+            // Show loading state
+            verifyBtn.disabled = true;
+            verifyBtn.classList.add('loading');
+            verifyBtn.textContent = '';
+            
+            try {
+                // Simulate API call - replace with actual API endpoint
+                const response = await fetch('/api/verify-otp/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken') // Add CSRF token for Django
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        otp: otp
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showAlert('Email verified successfully! Redirecting to login...', 'success');
+                    
+                    // Clear stored username
+                    localStorage.removeItem('verification_username');
+                    
+                    // Redirect to login page
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                } else {
+                    showAlert(data.message || 'Invalid OTP. Please try again.', 'error');
+                    clearOTP();
+                }
+            } catch (error) {
+                console.error('OTP verification error:', error);
+                showAlert('An error occurred. Please try again.', 'error');
+                clearOTP();
+            } finally {
+                // Reset button state
+                verifyBtn.disabled = false;
+                verifyBtn.classList.remove('loading');
+                verifyBtn.textContent = 'Verify OTP';
+            }
+        });
+
+        document.getElementById('resendBtn').addEventListener('click', async function() {
+            const username = document.getElementById('username').value;
+            
+            if (!username) {
+                showAlert('Please enter your username', 'error');
+                return;
+            }
+            
+            const resendBtn = this;
+            resendBtn.disabled = true;
+            resendBtn.classList.add('loading');
+            resendBtn.textContent = '';
+            
+            try {
+                // Simulate API call - replace with actual API endpoint
+                const response = await fetch('/api/resend-otp/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        username: username
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showAlert('OTP resent successfully! Check your email.', 'success');
+                    clearOTP();
+                    startResendTimer();
+                } else {
+                    showAlert(data.message || 'Failed to resend OTP. Please try again.', 'error');
+                    resendBtn.disabled = false;
+                }
+            } catch (error) {
+                console.error('Resend OTP error:', error);
+                showAlert('An error occurred. Please try again.', 'error');
+                resendBtn.disabled = false;
+            } finally {
+                resendBtn.classList.remove('loading');
+                resendBtn.textContent = 'Resend OTP';
+            }
+        });
+
+        // Function to get CSRF token for Django
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Start the resend timer when page loads
+        startResendTimer();
+    </script>
+</body>
+</html>

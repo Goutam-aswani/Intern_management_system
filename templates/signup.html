@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sign Up | Intern Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f2f2;
+            padding: 40px;
+        }
+
+        .signup-container {
+            background: #fff;
+            width: 400px;
+            margin: 0 auto;
+            padding: 30px 40px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="tel"] {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .error {
+            color: red;
+            font-size: 12px;
+            margin-bottom: 10px;
+            display: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #007BFF;
+            color: #fff;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:disabled {
+            background-color: #999;
+            cursor: not-allowed;
+        }
+
+        .note {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #555;
+            text-align: center;
+        }
+        select {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-family: inherit;
+    font-size: 14px;
+    background-color: #fff;
+    color: #333;
+}
+    </style>
+</head>
+<body>
+
+    <div class="signup-container">
+        <h2>Create Account</h2>
+        <form id="signup-form">
+    <label>Email</label>
+    <input type="email" name="email" id="email" placeholder="Enter your email" required>
+
+    <label>Username</label>
+    <input type="text" name="username" id="username" placeholder="Choose a username" required>
+
+    <label>Phone</label>
+    <input type="tel" name="phone" id="phone" placeholder="10-digit phone number" pattern="[6-9]\d{9}" required>
+
+    <label>Password</label>
+    <input type="password" name="password" id="password" placeholder="Create a password" required>
+
+    <label>Confirm Password</label>
+    <input type="password" name="password2" id="password2" placeholder="Confirm your password" required>
+    <div class="error" id="password-error">Passwords do not match.</div>
+
+     <label for="user_type">User Type</label>
+        <select name="user_type" id="user_type" required>
+            <option value="">-- Select User Type --</option>
+            <option value="manager">Manager</option>
+            <option value="intern">Intern</option>
+        </select>
+    <button type="submit" id="submit-btn" disabled>Register</button>
+
+    <p class="note">An OTP will be sent to your email to verify your account.</p>
+    <center><div type="text">
+            <a>Already have an account?</a>
+        </div>
+    <div class="links">
+            <a href="/login/">Login</a>
+        </div></center>
+</form>
+
+<script>
+    const form = document.getElementById("signup-form");
+    const submitBtn = document.getElementById("submit-btn");
+    const password = document.getElementById("password");
+    const password2 = document.getElementById("password2");
+    const passwordError = document.getElementById("password-error");
+
+    const email = document.getElementById("email");
+    const username = document.getElementById("username");
+    const phone = document.getElementById("phone");
+    const user_type = document.getElementById("user_type");
+
+    function validateForm() {
+        const passMatch = password.value === password2.value;
+        const allFilled = email.value && username.value && phone.value && password.value && password2.value && user_type.value;
+
+        if (!passMatch && password2.value !== "") {
+            passwordError.style.display = "block";
+        } else {
+            passwordError.style.display = "none";
+        }
+
+        submitBtn.disabled = !(passMatch && allFilled);
+    }
+
+    password.addEventListener("input", validateForm);
+    password2.addEventListener("input", validateForm);
+    email.addEventListener("input", validateForm);
+    username.addEventListener("input", validateForm);
+    phone.addEventListener("input", validateForm);
+    user_type.addEventListener("input", validateForm);
+
+    form.addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const formData = {
+            email: email.value,
+            username: username.value,
+            phone: phone.value,
+            password: password.value,
+            user_type: user_type.value
+        };
+
+        try {
+            const response = await fetch('/api/register/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+
+            const data = await response.json();
+
+            if (response.status === 200 || response.status === 201) {
+                alert("Registration successful. Redirecting to OTP verification...");
+                localStorage.setItem("pendingUsername", formData.username);
+                window.location.href = "{% url 'verify-otp' %}";
+            } else {
+                alert("Error: " + (data.message || "Something went wrong"));
+            }
+        } catch (error) {
+            console.error(error);
+            alert("An error occurred. Please try again.");
+        }
+    });
+</script>
