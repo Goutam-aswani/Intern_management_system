@@ -194,15 +194,24 @@
 
     <script>
         let authToken = localStorage.getItem('access');
-
+        let userType = localStorage.getItem("user_type");
         if (!authToken) {
             alert('Please log in first');
             window.location.href = '/login/';
         }
-
-        function goToDashboard() {
+        
+        function redirectToDashboard() {
+        if (userType === 'manager') {
+            window.location.href = '/manager_dashboard/';
+        } else if (userType === 'intern') {
+            window.location.href = '/intern_dashboard/';
+        } else {
             window.location.href = '/intern_dashboard/';
         }
+    }
+    function goToDashboard() {
+        redirectToDashboard();
+    }
 
         function logout() {
             if (confirm('Are you sure you want to logout?')) {

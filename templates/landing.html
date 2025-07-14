@@ -39,6 +39,7 @@
         } else {
             document.getElementById("welcome-msg").textContent = `Logged in as ${userType}. Redirecting...`;
 
+            
             setTimeout(() => {
                 if (userType === "admin") {
                     window.location.href = "/admin/";
