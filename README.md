@@ -98,15 +98,9 @@ Here are some key endpoints (refer to Postman collection or API docs for more):
 
 ---
 
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
 ## 📧 Contact
 
-For any queries or contributions, reach out via GitHub or email: [your-email@example.com]
+For any queries or contributions, reach out via GitHub or email: [goutamaswani43@gmail.com]
 
 ---
 
