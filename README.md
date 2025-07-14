@@ -73,6 +73,23 @@ docker compose up --build
 
 ---
 
+
+## 🏗️ Architecture
+
+```
+├── accounts/
+│   ├── models.py
+│   ├── serializers.py
+│   ├── permissions.py
+│   └── utils/otp.py
+├── templates/
+├── models.py
+├── mysite/ (project settings)
+│   ├── celery.py (configured with beat) 
+├── db.sqlite3
+├── Dockerfile
+```
+
 ## 📡 API Endpoints
 
 Here are some key endpoints (refer to Postman collection or API docs for more):
